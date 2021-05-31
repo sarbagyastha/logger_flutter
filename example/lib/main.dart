@@ -46,10 +46,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      routes: <String, WidgetBuilder>{
-        "home": (context) => HomeWidget(),
-      },
-      initialRoute: "home",
+      home: HomeWidget(),
     );
   }
 }

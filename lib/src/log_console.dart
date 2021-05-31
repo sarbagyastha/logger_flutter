@@ -9,7 +9,7 @@ class LogConsole extends StatefulWidget {
   LogConsole({this.dark = false, this.showCloseButton = false});
 
   static Future<void> open(BuildContext context, {required bool dark}) async {
-    var logConsole = LogConsole(
+    final logConsole = LogConsole(
       showCloseButton: true,
       dark: dark,
     );
@@ -32,15 +32,6 @@ class LogConsole extends StatefulWidget {
 
   @override
   _LogConsoleState createState() => _LogConsoleState();
-}
-
-class RenderedEvent {
-  final int id;
-  final Level level;
-  final TextSpan span;
-  final String lowerCaseText;
-
-  RenderedEvent(this.id, this.level, this.span, this.lowerCaseText);
 }
 
 class _LogConsoleState extends State<LogConsole> {
@@ -123,7 +114,12 @@ class _LogConsoleState extends State<LogConsole> {
             children: <Widget>[
               _buildTopBar(),
               Expanded(
-                child: _buildLogContent(),
+                child: LogContent(
+                  dark: widget.dark,
+                  buffer: _filteredBuffer,
+                  fontSize: _logFontSize,
+                  scrollController: _scrollController,
+                ),
               ),
               _buildBottomBar(),
             ],
@@ -149,32 +145,6 @@ class _LogConsoleState extends State<LogConsole> {
     );
   }
 
-  Widget _buildLogContent() {
-    return Container(
-      color: widget.dark ? Colors.black : Colors.grey[150],
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: 1600,
-          child: ListView.builder(
-            shrinkWrap: true,
-            controller: _scrollController,
-            itemBuilder: (context, index) {
-              var logEntry = _filteredBuffer[index];
-
-              return Text.rich(
-                logEntry.span,
-                key: Key(logEntry.id.toString()),
-                style: TextStyle(fontSize: _logFontSize),
-              );
-            },
-            itemCount: _filteredBuffer.length,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildTopBar() {
     return LogBar(
       dark: widget.dark,
@@ -182,7 +152,7 @@ class _LogConsoleState extends State<LogConsole> {
         mainAxisSize: MainAxisSize.max,
         children: <Widget>[
           Text(
-            "Log Console",
+            'Log Console',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -303,6 +273,47 @@ class _LogConsoleState extends State<LogConsole> {
   }
 }
 
+class LogContent extends StatelessWidget {
+  final bool dark;
+  final ScrollController scrollController;
+  final List<RenderedEvent> buffer;
+  final double fontSize;
+
+  const LogContent({
+    Key? key,
+    required this.dark,
+    required this.scrollController,
+    required this.buffer,
+    required this.fontSize,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: dark ? Colors.black : Colors.grey[150],
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SizedBox(
+          width: 1600,
+          child: ListView.builder(
+            controller: scrollController,
+            itemBuilder: (context, index) {
+              var logEntry = buffer[index];
+
+              return Text.rich(
+                logEntry.span,
+                key: Key(logEntry.id.toString()),
+                style: TextStyle(fontSize: fontSize),
+              );
+            },
+            itemCount: buffer.length,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class LogBar extends StatelessWidget {
   final bool dark;
   final Widget child;
@@ -333,4 +344,13 @@ class LogBar extends StatelessWidget {
       ),
     );
   }
+}
+
+class RenderedEvent {
+  final int id;
+  final Level level;
+  final TextSpan span;
+  final String lowerCaseText;
+
+  RenderedEvent(this.id, this.level, this.span, this.lowerCaseText);
 }
