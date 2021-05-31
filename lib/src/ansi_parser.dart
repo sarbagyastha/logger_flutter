@@ -7,7 +7,7 @@ class AnsiParser {
 
   AnsiParser(this.dark);
 
-  late Color foreground;
+  Color? foreground;
   Color background = Colors.black;
   late List<TextSpan> spans;
 

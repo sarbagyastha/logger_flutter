@@ -24,26 +24,25 @@ class _LogConsoleOnShakeState extends State<LogConsoleOnShake> {
     super.initState();
 
     if (widget.debugOnly) {
-      assert(() {
-        _init();
-        return true;
-      }());
+      assert(_init());
     } else {
       _init();
     }
   }
 
   @override
-  Widget build(BuildContext context) {
-    return widget.child;
-  }
+  Widget build(BuildContext context) => widget.child;
 
-  _init() {
-    _detector = ShakeDetector(onPhoneShake: _openLogConsole);
+  bool _init() {
+    _detector = ShakeDetector(
+      onPhoneShake: _openLogConsole,
+      minShakeCount: 10,
+    );
     _detector.startListening();
+    return true;
   }
 
-  _openLogConsole() async {
+  void _openLogConsole() async {
     if (_open) return;
 
     _open = true;
