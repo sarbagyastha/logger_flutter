@@ -3,12 +3,12 @@ part of logger_flutter;
 class LogConsoleOnShake extends StatefulWidget {
   final Widget child;
   final bool dark;
-  final bool debugOnly;
+  final bool show;
 
   LogConsoleOnShake({
     required this.child,
     this.dark = true,
-    this.debugOnly = true,
+    this.show = true,
   });
 
   @override
@@ -23,11 +23,7 @@ class _LogConsoleOnShakeState extends State<LogConsoleOnShake> {
   void initState() {
     super.initState();
 
-    if (widget.debugOnly) {
-      assert(_init());
-    } else {
-      _init();
-    }
+    if (widget.show) _init();
   }
 
   @override
