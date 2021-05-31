@@ -98,7 +98,15 @@ class _LogConsoleState extends State<LogConsole> {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: Theme.of(context),
+      theme: ThemeData.from(
+        colorScheme: ColorScheme.light(
+          background: Colors.deepPurple,
+          secondary: Colors.deepPurple,
+          surface: Colors.deepPurple,
+          primary: Colors.deepPurple,
+          brightness: widget.dark ? Brightness.dark : Brightness.light,
+        ),
+      ),
       home: Scaffold(
         body: SafeArea(
           child: Column(
@@ -282,7 +290,7 @@ class LogContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Theme.of(context).scaffoldBackgroundColor,
+      color: dark ? Colors.black : Colors.grey[150],
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: SizedBox(
