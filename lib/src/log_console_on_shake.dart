@@ -6,8 +6,8 @@ class LogConsoleOnShake extends StatefulWidget {
   final bool debugOnly;
 
   LogConsoleOnShake({
-    @required this.child,
-    this.dark,
+    required this.child,
+    this.dark = true,
     this.debugOnly = true,
   });
 
@@ -16,7 +16,7 @@ class LogConsoleOnShake extends StatefulWidget {
 }
 
 class _LogConsoleOnShakeState extends State<LogConsoleOnShake> {
-  ShakeDetector _detector;
+  late ShakeDetector _detector;
   bool _open = false;
 
   @override
@@ -39,7 +39,6 @@ class _LogConsoleOnShakeState extends State<LogConsoleOnShake> {
   }
 
   _init() {
-    LogConsole.init();
     _detector = ShakeDetector(onPhoneShake: _openLogConsole);
     _detector.startListening();
   }
@@ -48,19 +47,7 @@ class _LogConsoleOnShakeState extends State<LogConsoleOnShake> {
     if (_open) return;
 
     _open = true;
-
-    var logConsole = LogConsole(
-      showCloseButton: true,
-      dark: widget.dark ?? Theme.of(context).brightness == Brightness.dark,
-    );
-    PageRoute route;
-    if (Platform.isIOS) {
-      route = CupertinoPageRoute(builder: (_) => logConsole);
-    } else {
-      route = MaterialPageRoute(builder: (_) => logConsole);
-    }
-
-    await Navigator.push(context, route);
+    await LogConsole.open(context, dark: widget.dark);
     _open = false;
   }
 

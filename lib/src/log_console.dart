@@ -1,27 +1,33 @@
 part of logger_flutter;
 
 ListQueue<OutputEvent> _outputEventBuffer = ListQueue();
-int _bufferSize = 20;
-bool _initialized = false;
 
 class LogConsole extends StatefulWidget {
   final bool dark;
   final bool showCloseButton;
 
-  LogConsole({this.dark = false, this.showCloseButton = false})
-      : assert(_initialized, "Please call LogConsole.init() first.");
+  LogConsole({this.dark = false, this.showCloseButton = false});
 
-  static void init({int bufferSize = 20}) {
-    if (_initialized) return;
+  static Future<void> open(BuildContext context, {required bool dark}) async {
+    var logConsole = LogConsole(
+      showCloseButton: true,
+      dark: dark,
+    );
+    PageRoute route;
+    if (Platform.isIOS) {
+      route = CupertinoPageRoute(builder: (_) => logConsole);
+    } else {
+      route = MaterialPageRoute(builder: (_) => logConsole);
+    }
 
-    _bufferSize = bufferSize;
-    _initialized = true;
-    Logger.addOutputListener((e) {
-      if (_outputEventBuffer.length == bufferSize) {
-        _outputEventBuffer.removeFirst();
-      }
-      _outputEventBuffer.add(e);
-    });
+    await Navigator.push(context, route);
+  }
+
+  static void add(OutputEvent outputEvent, {int bufferSize = 20}) {
+    while (_outputEventBuffer.length >= (bufferSize)) {
+      _outputEventBuffer.removeFirst();
+    }
+    _outputEventBuffer.add(outputEvent);
   }
 
   @override
@@ -38,8 +44,6 @@ class RenderedEvent {
 }
 
 class _LogConsoleState extends State<LogConsole> {
-  OutputCallback _callback;
-
   ListQueue<RenderedEvent> _renderedBuffer = ListQueue();
   List<RenderedEvent> _filteredBuffer = [];
 
@@ -56,17 +60,6 @@ class _LogConsoleState extends State<LogConsole> {
   @override
   void initState() {
     super.initState();
-
-    _callback = (e) {
-      if (_renderedBuffer.length == _bufferSize) {
-        _renderedBuffer.removeFirst();
-      }
-
-      _renderedBuffer.add(_renderEvent(e));
-      _refreshFilter();
-    };
-
-    Logger.addOutputListener(_callback);
 
     _scrollController.addListener(() {
       if (!_scrollListenerEnabled) return;
@@ -270,7 +263,7 @@ class _LogConsoleState extends State<LogConsole> {
               )
             ],
             onChanged: (value) {
-              _filterLevel = value;
+              _filterLevel = value as Level;
               _refreshFilter();
             },
           )
@@ -307,19 +300,13 @@ class _LogConsoleState extends State<LogConsole> {
       text.toLowerCase(),
     );
   }
-
-  @override
-  void dispose() {
-    Logger.removeOutputListener(_callback);
-    super.dispose();
-  }
 }
 
 class LogBar extends StatelessWidget {
   final bool dark;
   final Widget child;
 
-  LogBar({this.dark, this.child});
+  LogBar({required this.dark, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -330,7 +317,7 @@ class LogBar extends StatelessWidget {
           boxShadow: [
             if (!dark)
               BoxShadow(
-                color: Colors.grey[400],
+                color: Colors.grey,
                 blurRadius: 3,
               ),
           ],
